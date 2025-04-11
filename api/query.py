@@ -30,9 +30,7 @@ class handler(BaseHTTPRequestHandler):
                     end_seconds,
                     duration
                 FROM SAMPLED_SONGS
-                WHERE sample_type IN ('vocals_only', 'drums_only', 'percussion_intro')
-                ORDER BY RANDOM()
-                LIMIT 50
+                
             """
 
             results = query_snowflake(sql)
