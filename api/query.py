@@ -28,16 +28,21 @@ class handler(BaseHTTPRequestHandler):
                     decade,
                     start_seconds,
                     end_seconds,
-                    duration
-                FROM SAMPLED_SONGS
-                
+                    duration,
+                    video_duration,
+                    view_count,
+                    like_count,
+                    comment_count,
+                    resolution
+                FROM SAMPLED_SONGS_ENRICHED
             """
 
             results = query_snowflake(sql)
 
             columns = [
                 "title", "youtube_url", "start_time", "end_time", "sample_type",
-                "description", "genre", "decade", "start_seconds", "end_seconds", "duration"
+                "description", "genre", "decade", "start_seconds", "end_seconds", "duration",
+                "video_duration", "view_count", "like_count", "comment_count", "resolution"
             ]
             data = [dict(zip(columns, row)) for row in results]
 
