@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 from snowflake_api import query_snowflake
 import json
 
@@ -16,7 +17,10 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            sql = """
+            query_components = parse_qs(urlparse(self.path).query)
+            prompt_filter = query_components.get("prompt_filter", [None])[0]
+
+            base_sql = """
                 SELECT
                     title,
                     youtube_url,
@@ -33,16 +37,23 @@ class handler(BaseHTTPRequestHandler):
                     view_count,
                     like_count,
                     comment_count,
-                    resolution
+                    resolution,
+                    chatgpt_prompt
                 FROM SAMPLED_SONGS_ENRICHED
             """
 
-            results = query_snowflake(sql)
+            if prompt_filter:
+                # Sanitize single quotes for Snowflake safety
+                prompt_filter_safe = prompt_filter.replace("'", "''")
+                base_sql += f" WHERE chatgpt_prompt = '{prompt_filter_safe}'"
+
+            results = query_snowflake(base_sql)
 
             columns = [
                 "title", "youtube_url", "start_time", "end_time", "sample_type",
                 "description", "genre", "decade", "start_seconds", "end_seconds", "duration",
-                "video_duration", "view_count", "like_count", "comment_count", "resolution"
+                "video_duration", "view_count", "like_count", "comment_count", "resolution",
+                "chatgpt_prompt"
             ]
             data = [dict(zip(columns, row)) for row in results]
 
