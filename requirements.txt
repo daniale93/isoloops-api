@@ -1,2 +1,4 @@
 snowflake-connector-python==3.5.0
 uvicorn[standard]
+fastapi
+python-dotenv
